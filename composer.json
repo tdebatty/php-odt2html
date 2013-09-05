@@ -1,6 +1,6 @@
 {
     "name": "webd/odt2html",
-    "description": "Convert Openoffice files (ODT) to HTML",
+    "description": "Convert OpenOffice text files (ODT) to HTML",
     "require": {
         "webd/html5": "dev-master"
     },

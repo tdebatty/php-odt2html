@@ -38,7 +38,6 @@ class ODT2HTMLTest extends \PHPUnit_Framework_TestCase {
         $odt_file = __DIR__ . "/../../../Test document.odt";
         $odt2html = new ODT2HTML($odt_file);
         $this->result = $odt2html->parse();
-        file_put_contents("/home/tibo/Desktop/result.html", $this->result);
     }
     
 }

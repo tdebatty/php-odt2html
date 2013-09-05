@@ -1,4 +1,12 @@
 php-odt2html
 ============
 
-PHP library to convert Openoffice files (ODT) to HTML
+PHP library to convert OpenOffice text files (ODT) to HTML.
+
+Usage
+-----
+
+```php
+$odt2html = new ODT2HTML($odt_file);
+echo $odt2html->parse();
+```
