@@ -1,0 +1,10 @@
+{
+    "name": "webd/odt2html",
+    "description": "Convert Openoffice files (ODT) to HTML",
+    "require": {
+        "webd/html5": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {"": "src/"}
+    }
+}

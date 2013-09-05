@@ -3,7 +3,7 @@
 ini_set('include_path',
         ini_get('include_path').PATH_SEPARATOR.
         '/usr/share/php/PHPUnit'.PATH_SEPARATOR.
-        dirname(__FILE__).'/../src/');
+        __DIR__ . '/../src/');
 
 spl_autoload_register(function($class) {
     $parts = explode('\\', $class);
@@ -17,5 +17,7 @@ spl_autoload_register(function($class) {
         require $file;
     }
 });
+
+include_once __DIR__ . '/../vendor/autoload.php';
 
 ?>

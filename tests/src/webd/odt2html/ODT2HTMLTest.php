@@ -11,6 +11,8 @@ class ODT2HTMLTest extends \PHPUnit_Framework_TestCase {
      * @var ODT2HTML
      */
     protected $object;
+    
+    protected $result = "";
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -32,18 +34,11 @@ class ODT2HTMLTest extends \PHPUnit_Framework_TestCase {
      * @covers webd\odt2html\ODT2HTML::odt2html
      * @todo   Implement testOdt2html().
      */
-    public function testOdt2html() {
-        $odt_file = dirname(__FILE__) . "/../../../Test document.odt";
+    public function testParse() {
+        $odt_file = __DIR__ . "/../../../Test document.odt";
         $odt2html = new ODT2HTML($odt_file);
-        $result = $odt2html->parse();
-        file_put_contents("/home/tibo/Desktop/result.html", $result);
+        $this->result = $odt2html->parse();
+        file_put_contents("/home/tibo/Desktop/result.html", $this->result);
     }
     
-    public function testIN005() {
-        $odt_file = "/home/tibo/Dropbox/ERM/IN005 Labs/IN005_session1.odt";
-        $odt2html = new ODT2HTML($odt_file);
-        $result = $odt2html->parse();
-        file_put_contents("/home/tibo/Desktop/result-in005.html", $result);
-    }
-
 }

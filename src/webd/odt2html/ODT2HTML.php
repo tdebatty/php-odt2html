@@ -1,189 +1,5 @@
 <?php
-
 namespace webd\odt2html;
-
-abstract class HTMLTag {
-    /**
-     *
-     * @var HTMLTag[] 
-     */
-    protected $children = array();
-    
-    /**
-     *
-     * @var HTMLTag 
-     */
-    protected $parent = null;
-    
-    
-    protected $classes = array();
-    
-    protected $tag = "";
-    
-    public $id = "";
-    
-    
-    public function appendChild(HTMLTag $child) {
-        $this->children[] = $child;
-        $child->parent = $this;
-    }
-    
-    public function getParent() {
-        return $this->parent;
-    }
-    
-    
-    public function value() {
-        return "";
-    }
-    
-    public function __toString() {
-
-        $return = "<";
-        $return .= $this->tag();
-        $return .= $this->id();
-        $return .= $this->classes();
-        $return .= $this->attributes();
-        $return .= ">";
-        
-        $return .= $this->value();
-        $return .= $this->children();
-        
-        $return .= "</" . $this->tag() . ">\n";
-
-        return $return;
-    }
-    
-    public function tag() {
-        return $this->tag;
-    }
-    
-    public function id() {
-        
-        if ($this->id != "") {
-            return " id='{$this->id}'";
-        }
-        return "";
-    }
-    
-    public function classes() {
-        $return = "";
-        if (count($this->classes)) {
-            $return .= " class='" . implode(" ", $this->classes) . "'";
-        }
-        return $return;
-    }
-    
-    public function attributes() {
-        $return = "";
-        $reflection = new \ReflectionObject($this);
-        foreach ($reflection->getProperties() as $property) {
-            /* @var $property \ReflectionProperty */
-            if ($property->isPublic() AND $property->name != "id") {
-                $value = $property->getValue($this);
-                $return .= " {$property->name}='$value'";
-            }
-        }
-        return $return;
-    }
-    
-    public function children() {
-        return trim(implode(" ", $this->children));
-    }
-    
-    public function addClass($class) {
-        $this->classes[] = $class;
-    }
-}
-
-class TagDummy extends HTMLTag
-{
-    public function __toString() {
-        return $this->children();
-    }  
-}
-
-class TagH1 extends HTMLTag
-{
-    protected $tag = "h1";
-
-}
-
-class TagH2 extends HTMLTag
-{
-    protected $tag = "h2";  
-}
-
-class TagH3 extends HTMLTag
-{
-    protected $tag = "h3"; 
-}
-
-class TagH4 extends HTMLTag
-{
-    protected $tag = "h4";  
-}
-
-class TagH5 extends HTMLTag
-{
-    protected $tag = "h5"; 
-}
-
-class TagH6 extends HTMLTag
-{
-    protected $tag = "h6";  
-}
-
-class TagImg extends HTMLTag
-{
-    public $src = "";
-    
-    protected $tag = "img";
-    
-    public function __construct($src) {
-        $this->src = $src;
-    }
-}
-
-class Text extends HTMLTag
-{
-    public $value = "";
-    
-    public function __toString() {
-        return trim($this->value);
-    }
-}
-
-class TagP  extends HTMLTag
-{
-    protected $tag = "p"; 
-}
-
-class TagA extends HTMLTag
-{
-    public $href = "";
-    
-    public function __construct($href) {
-        $this->href = $href;
-    }
-    
-    protected $tag = "a";
-}
-
-class Ul extends HTMLTag
-{
-    protected $tag = "ul"; 
-}
-
-class Li extends HTMLTag
-{
-    protected $tag = "li";
-}
-
-class Ol extends HTMLTag
-{
-    protected $tag = "ol";
-}
 
 class ODT2HTML {
     
@@ -197,11 +13,11 @@ class ODT2HTML {
         $this->xml = new \XMLReader();
         $this->xml->open('zip://' . $odt_file . '#content.xml');
         
-        $this->root = new TagDummy();
+        $this->root = new \webd\html5\DummyTag();
         $this->current_tag = $this->root;
     }
     
-    protected function appendTag(HTMLTag $tag) {
+    protected function appendTag(\webd\html5\Tag $tag) {
         $this->current_tag->appendChild($tag);
         
         $class = $this->xml->getAttribute("text:style-name");
@@ -229,9 +45,7 @@ class ODT2HTML {
             }
             
             if ($this->xml->nodeType === \XMLReader::TEXT) {
-                $new = new Text();
-                $new->value = htmlspecialchars($this->xml->value);
-                $this->current_tag->appendChild($new);
+                $this->current_tag->appendChild(new \webd\html5\Text(htmlspecialchars($this->xml->value)));
             }
             
             
@@ -242,46 +56,58 @@ class ODT2HTML {
                         $n = $this->xml->getAttribute("text:outline-level");
                         switch ($n) {
                             case 1 :
-                                $this->appendTag(new TagH1());
+                                $this->appendTag(new \webd\html5\H1());
                                 break;
                             case 2 :
-                                $this->appendTag(new TagH2());
+                                $this->appendTag(new \webd\html5\H2());
                                 break;
                             case 3 :
-                                $this->appendTag(new TagH3());
+                                $this->appendTag(new \webd\html5\H3());
                                 break;
                             case 4 :
-                                $this->appendTag(new TagH4());
+                                $this->appendTag(new \webd\html5\H4());
                                 break;
                             case 5 :
-                                $this->appendTag(new TagH5());
+                                $this->appendTag(new \webd\html5\H5());
                                 break;
                             default :
-                                $this->appendTag(new TagH6());
+                                $this->appendTag(new \webd\html5\H6());
                         }
                         break;
 
                     case "text:p":
-                        $this->appendTag(new TagP());
+                        $this->appendTag(new \webd\html5\P());
                         break;
                     
                     case "draw:image":
                         $image_file = 'zip://' . $this->odt_file . '#' . $this->xml->getAttribute("xlink:href");
                         $src = 'data:image;base64,' . base64_encode(file_get_contents($image_file));
-                        $this->appendTag(new TagImg($src));
+                        $this->appendTag(new \webd\html5\Img($src));
                         break;
                 
                     case "text:a":
                         $href = $this->xml->getAttribute("xlink:href");
-                        $this->appendTag(new TagA($href));
+                        $this->appendTag(new \webd\html5\A($href));
                         break;
                     
                     case "text:list":
-                        $this->appendTag(new Ul());
+                        $this->appendTag(new \webd\html5\Ul());
                         break;
                     
                     case "text:list-item":
-                        $this->appendTag(new Li());
+                        $this->appendTag(new \webd\html5\Li());
+                        break;
+                    
+                    case "table:table":
+                        $this->appendTag(new \webd\html5\Table());
+                        break;
+                    
+                    case "table:table-row":
+                        $this->appendTag(new \webd\html5\Tr());
+                        break;
+                    
+                    case "table:table-cell":
+                        $this->appendTag(new \webd\html5\Td());
                         break;
                     
                     case "text:table-of-content":
@@ -293,7 +119,7 @@ class ODT2HTML {
                         continue;
 
                     default : 
-                         $this->appendTag(new TagDummy());
+                         $this->appendTag(new \webd\html5\DummyTag());
                          
 
                 } // switch   
