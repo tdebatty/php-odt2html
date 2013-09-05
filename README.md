@@ -7,6 +7,6 @@ Usage
 -----
 
 ```php
-$odt2html = new ODT2HTML($odt_file);
+$odt2html = new \webd\odt2html\ODT2HTML($odt_file);
 echo $odt2html->parse();
 ```
